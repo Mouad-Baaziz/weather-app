@@ -140,3 +140,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "https://web-production-58c4.up.railway.app",
 ]
+
+CSRF_COOKIE_SECURE = True     # only sent over HTTPS
+SESSION_COOKIE_SECURE = True 
