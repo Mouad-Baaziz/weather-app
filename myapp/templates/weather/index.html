@@ -98,6 +98,9 @@
 </div>
 
 <script>
+    // Get current language from Django template
+    const CURRENT_LANG = '{{ current_language }}';
+    
     // Translations object
     const translations = {
         en: {
@@ -116,7 +119,7 @@
 
     // Get current language
     function getCurrentLanguage() {
-        return document.documentElement.lang || 'en';
+        return CURRENT_LANG || 'en';
     }
 
     // Load default city on page load

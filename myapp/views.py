@@ -2,11 +2,15 @@ import requests
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils.translation import get_language
-from datetime import datetime
+from datetime import datetime, timezone
 
 def index(request):
     """Main weather app view"""
-    return render(request, 'weather/index.html')
+    # Get current language
+    current_lang = get_language()
+    return render(request, 'weather/index.html', {
+        'current_language': current_lang
+    })
 
 def get_weather(request):
     """API endpoint to fetch weather data"""
@@ -22,18 +26,40 @@ def get_weather(request):
     BASE_URL = 'http://api.openweathermap.org/data/2.5/weather'
     
     try:
+        # First request to get city name in English
+        params_en = {
+            'q': city,
+            'appid': API_KEY,
+            'units': 'metric',
+            'lang': 'en'
+        }
+        response_en = requests.get(BASE_URL, params=params_en)
+        data_en = response_en.json()
+        
+        # Second request for translated weather descriptions
         params = {
             'q': city,
             'appid': API_KEY,
             'units': 'metric',
-            'lang': api_lang  # Add language parameter
+            'lang': api_lang
         }
         response = requests.get(BASE_URL, params=params)
         data = response.json()
         
         if response.status_code == 200:
+            # Calculate local time for sunrise/sunset using timezone offset
+            timezone_offset = data['timezone']  # Offset in seconds from UTC
+            
+            sunrise_utc = datetime.fromtimestamp(data['sys']['sunrise'], tz=timezone.utc)
+            sunset_utc = datetime.fromtimestamp(data['sys']['sunset'], tz=timezone.utc)
+            
+            # Add timezone offset to get local time
+            from datetime import timedelta
+            sunrise_local = sunrise_utc + timedelta(seconds=timezone_offset)
+            sunset_local = sunset_utc + timedelta(seconds=timezone_offset)
+            
             weather_data = {
-                'city': data['name'],
+                'city': data_en['name'],  # Use English city name
                 'country': data['sys']['country'],
                 'temperature': round(data['main']['temp']),
                 'feels_like': round(data['main']['feels_like']),
@@ -43,8 +69,8 @@ def get_weather(request):
                 'wind_speed': round(data['wind']['speed'] * 3.6),  # Convert to km/h
                 'pressure': data['main']['pressure'],
                 'visibility': data.get('visibility', 0) // 1000,  # Convert to km
-                'sunrise': datetime.fromtimestamp(data['sys']['sunrise']).strftime('%H:%M'),
-                'sunset': datetime.fromtimestamp(data['sys']['sunset']).strftime('%H:%M'),
+                'sunrise': sunrise_local.strftime('%H:%M'),
+                'sunset': sunset_local.strftime('%H:%M'),
             }
             return JsonResponse({'success': True, 'data': weather_data})
         else:
@@ -75,11 +101,22 @@ def get_forecast(request):
     }
     
     try:
+        # First request to get city name in English
+        params_en = {
+            'q': city,
+            'appid': API_KEY,
+            'units': 'metric',
+            'lang': 'en'
+        }
+        response_en = requests.get(BASE_URL, params=params_en)
+        data_en = response_en.json()
+        
+        # Second request for translated weather descriptions
         params = {
             'q': city,
             'appid': API_KEY,
             'units': 'metric',
-            'lang': api_lang  # Add language parameter
+            'lang': api_lang
         }
         response = requests.get(BASE_URL, params=params)
         data = response.json()
