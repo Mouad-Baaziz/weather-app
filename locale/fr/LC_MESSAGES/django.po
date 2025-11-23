@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-23 10:42+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\myapp\templates\weather\base.html:7
+msgid "Weather App"
+msgstr "Application Météo"
+
+#: .\myapp\templates\weather\index.html:8
+msgid "Weather Forecast"
+msgstr "Prévisions Météo"
+
+#: .\myapp\templates\weather\index.html:9
+msgid "Get real-time weather updates for any city"
+msgstr ""
+"Obtenez des mises à jour météo en temps réel pour n'importe quelle ville"
+
+#: .\myapp\templates\weather\index.html:18
+msgid "Enter city name..."
+msgstr "Entrez le nom de la ville..."
+
+#: .\myapp\templates\weather\index.html:25
+msgid "Search"
+msgstr "Rechercher"
+
+#: .\myapp\templates\weather\index.html:34
+msgid "Loading weather data..."
+msgstr "Chargement des données météo..."
+
+#: .\myapp\templates\weather\index.html:53
+msgid "Weather icon"
+msgstr "Icône météo"
+
+#: .\myapp\templates\weather\index.html:61
+msgid "Humidity"
+msgstr "Humidité"
+
+#: .\myapp\templates\weather\index.html:65
+msgid "Wind Speed"
+msgstr "Vitesse du vent"
+
+#: .\myapp\templates\weather\index.html:69
+msgid "Pressure"
+msgstr "Pression"
+
+#: .\myapp\templates\weather\index.html:73
+msgid "Visibility"
+msgstr "Visibilité"
+
+#: .\myapp\templates\weather\index.html:82
+msgid "Sunrise"
+msgstr "Lever du soleil"
+
+#: .\myapp\templates\weather\index.html:86
+msgid "Sunset"
+msgstr "Coucher du soleil"
+
+#: .\myapp\templates\weather\index.html:94
+msgid "5-Day Forecast"
+msgstr "Prévisions sur 5 jours"

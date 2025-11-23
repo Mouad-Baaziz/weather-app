@@ -1,0 +1,232 @@
+{% extends 'weather/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 min-h-screen flex flex-col items-center justify-center">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-5xl font-bold text-white mb-2 drop-shadow-lg">{% trans "Weather Forecast" %}</h1>
+        <p class="text-white text-lg opacity-90">{% trans "Get real-time weather updates for any city" %}</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="w-full max-w-md mb-8">
+        <div class="relative">
+            <input 
+                type="text" 
+                id="cityInput" 
+                placeholder="{% trans 'Enter city name...' %}" 
+                class="w-full px-6 py-4 rounded-full text-lg focus:outline-none focus:ring-4 focus:ring-white/50 shadow-2xl"
+                onkeypress="if(event.key === 'Enter') searchWeather()"
+            >
+            <button 
+                onclick="searchWeather()" 
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full transition-all duration-300 shadow-lg">
+                {% trans "Search" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden text-white text-xl">
+        <div class="flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            <span>{% trans "Loading weather data..." %}</span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error" class="hidden bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg mb-8">
+        <p id="errorMessage"></p>
+    </div>
+
+    <!-- Main Weather Card -->
+    <div id="weatherCard" class="hidden w-full max-w-4xl">
+        <div class="bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl p-8 mb-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <!-- Left: Main Weather Info -->
+                <div class="text-white mb-6 md:mb-0">
+                    <h2 id="cityName" class="text-4xl font-bold mb-2"></h2>
+                    <p id="weatherDesc" class="text-2xl capitalize mb-4"></p>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-7xl font-bold" id="temperature"></div>
+                        <img id="weatherIcon" class="w-24 h-24" alt="{% trans 'Weather icon' %}">
+                    </div>
+                    <p id="feelsLike" class="text-lg mt-2 opacity-90"></p>
+                </div>
+
+                <!-- Right: Weather Details Grid -->
+                <div class="grid grid-cols-2 gap-4 text-white">
+                    <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-sm opacity-80">{% trans "Humidity" %}</p>
+                        <p id="humidity" class="text-2xl font-semibold"></p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-sm opacity-80">{% trans "Wind Speed" %}</p>
+                        <p id="windSpeed" class="text-2xl font-semibold"></p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-sm opacity-80">{% trans "Pressure" %}</p>
+                        <p id="pressure" class="text-2xl font-semibold"></p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+                        <p class="text-sm opacity-80">{% trans "Visibility" %}</p>
+                        <p id="visibility" class="text-2xl font-semibold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sun Times -->
+            <div class="flex justify-around mt-8 pt-8 border-t border-white/20 text-white">
+                <div class="text-center">
+                    <p class="text-sm opacity-80">{% trans "Sunrise" %}</p>
+                    <p id="sunrise" class="text-xl font-semibold"></p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm opacity-80">{% trans "Sunset" %}</p>
+                    <p id="sunset" class="text-xl font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5-Day Forecast -->
+        <div class="bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl p-8">
+            <h3 class="text-white text-2xl font-bold mb-6">{% trans "5-Day Forecast" %}</h3>
+            <div id="forecast" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Translations object
+    const translations = {
+        en: {
+            feelsLike: 'Feels like',
+            cityNotFound: 'City not found. Please try again.',
+            enterCity: 'Please enter a city name',
+            errorOccurred: 'An error occurred. Please try again.'
+        },
+        fr: {
+            feelsLike: 'Ressenti',
+            cityNotFound: 'Ville introuvable. Veuillez réessayer.',
+            enterCity: 'Veuillez entrer un nom de ville',
+            errorOccurred: 'Une erreur s\'est produite. Veuillez réessayer.'
+        }
+    };
+
+    // Get current language
+    function getCurrentLanguage() {
+        return document.documentElement.lang || 'en';
+    }
+
+    // Load default city on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        // Check if there's a previously searched city
+        const lastCity = localStorage.getItem('lastSearchedCity');
+        if (lastCity) {
+            document.getElementById('cityInput').value = lastCity;
+            searchWeather(lastCity);
+            // Clear the stored city after using it
+            localStorage.removeItem('lastSearchedCity');
+        } else {
+            searchWeather('Constantine');
+        }
+    });
+
+    async function searchWeather(defaultCity = null) {
+        const city = defaultCity || document.getElementById('cityInput').value.trim();
+        const lang = getCurrentLanguage();
+        
+        if (!city && !defaultCity) {
+            showError(translations[lang].enterCity);
+            return;
+        }
+
+        showLoading();
+        hideError();
+        hideWeatherCard();
+
+        try {
+            // Fetch current weather
+            const weatherResponse = await fetch(`/api/weather/?city=${encodeURIComponent(city)}`);
+            const weatherData = await weatherResponse.json();
+
+            if (!weatherData.success) {
+                showError(weatherData.error || translations[lang].cityNotFound);
+                hideLoading();
+                return;
+            }
+
+            // Fetch forecast
+            const forecastResponse = await fetch(`/api/forecast/?city=${encodeURIComponent(city)}`);
+            const forecastData = await forecastResponse.json();
+
+            hideLoading();
+            displayWeather(weatherData.data, forecastData.data);
+
+        } catch (error) {
+            hideLoading();
+            showError(translations[lang].errorOccurred);
+            console.error('Error:', error);
+        }
+    }
+
+    function displayWeather(weather, forecast) {
+        const lang = getCurrentLanguage();
+        
+        // Update main weather info
+        document.getElementById('cityName').textContent = `${weather.city}, ${weather.country}`;
+        document.getElementById('weatherDesc').textContent = weather.description;
+        document.getElementById('temperature').textContent = `${weather.temperature}°C`;
+        document.getElementById('weatherIcon').src = `http://openweathermap.org/img/wn/${weather.icon}@2x.png`;
+        document.getElementById('feelsLike').textContent = `${translations[lang].feelsLike} ${weather.feels_like}°C`;
+        
+        // Update details
+        document.getElementById('humidity').textContent = `${weather.humidity}%`;
+        document.getElementById('windSpeed').textContent = `${weather.wind_speed} km/h`;
+        document.getElementById('pressure').textContent = `${weather.pressure} hPa`;
+        document.getElementById('visibility').textContent = `${weather.visibility} km`;
+        document.getElementById('sunrise').textContent = weather.sunrise;
+        document.getElementById('sunset').textContent = weather.sunset;
+
+        // Update forecast
+        const forecastContainer = document.getElementById('forecast');
+        forecastContainer.innerHTML = forecast.map(day => {
+            return `
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center text-white">
+                <p class="font-semibold mb-2">${day.date}</p>
+                <img src="http://openweathermap.org/img/wn/${day.icon}.png" class="w-16 h-16 mx-auto" alt="${day.description}">
+                <p class="text-2xl font-bold">${day.temp}°C</p>
+                <p class="text-sm opacity-80 capitalize">${day.description}</p>
+            </div>
+        `}).join('');
+
+        showWeatherCard();
+    }
+
+    function showLoading() {
+        document.getElementById('loading').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').classList.add('hidden');
+    }
+
+    function showError(message) {
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('error').classList.remove('hidden');
+    }
+
+    function hideError() {
+        document.getElementById('error').classList.add('hidden');
+    }
+
+    function showWeatherCard() {
+        document.getElementById('weatherCard').classList.remove('hidden');
+    }
+
+    function hideWeatherCard() {
+        document.getElementById('weatherCard').classList.add('hidden');
+    }
+</script>
+{% endblock %}

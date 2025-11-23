@@ -1,0 +1,84 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "Weather App" %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-400 via-blue-500 to-purple-600 min-h-screen">
+    <!-- Language Switcher -->
+    <div class="absolute top-4 right-4 z-10">
+        <div class="bg-white/20 backdrop-blur-lg rounded-full shadow-lg p-2 flex space-x-2">
+            <button onclick="changeLanguage('en')" 
+                    class="px-4 py-2 rounded-full transition-all duration-300 {% if LANGUAGE_CODE == 'en' %}bg-white text-blue-600{% else %}text-white hover:bg-white/20{% endif %}"
+                    id="lang-en">
+                EN
+            </button>
+            <button onclick="changeLanguage('fr')" 
+                    class="px-4 py-2 rounded-full transition-all duration-300 {% if LANGUAGE_CODE == 'fr' %}bg-white text-blue-600{% else %}text-white hover:bg-white/20{% endif %}"
+                    id="lang-fr">
+                FR
+            </button>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <script>
+        function changeLanguage(langCode) {
+            // Store the current city before language change
+            const cityInput = document.getElementById('cityInput');
+            const currentCity = cityInput ? cityInput.value : null;
+            if (currentCity) {
+                localStorage.setItem('lastSearchedCity', currentCity);
+            }
+            
+            // Store the selected language in localStorage
+            localStorage.setItem('selectedLanguage', langCode);
+            
+            // Send POST request to change language
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/i18n/setlang/';
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'language';
+            input.value = langCode;
+            form.appendChild(input);
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = getCookie('csrftoken');
+            form.appendChild(csrfInput);
+            
+            const nextInput = document.createElement('input');
+            nextInput.type = 'hidden';
+            nextInput.name = 'next';
+            nextInput.value = window.location.pathname;
+            form.appendChild(nextInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
