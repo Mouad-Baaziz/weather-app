@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-#=@6s^nxj7ajc1cqa@w)#@z&$599c1db)i0id1g*ikb_zewud7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['.railway.app', 'localhost',
+    '127.0.0.1',]
 
 
 # Application definition
@@ -139,7 +140,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     "https://web-production-58c4.up.railway.app",
+    'https://*.railway.app',
 ]
 
 CSRF_COOKIE_SECURE = True     # only sent over HTTPS
-SESSION_COOKIE_SECURE = True 
+CSRF_COOKIE_SAMESITE = 'Lax'  # or 'None' if needed
+CSRF_COOKIE_HTTPONLY = False  # Must be False for the cookie to be accessible
+
+# Session Cookie Settings
+SESSION_COOKIE_SECURE = True  # Only if using HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'
