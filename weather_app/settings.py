@@ -138,7 +138,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
-    "https://web-production-d381.up.railway.app/",
+    "https://web-production-d381.up.railway.app",
     'https://weather-app-pw2u.onrender.com'
 ]
 
