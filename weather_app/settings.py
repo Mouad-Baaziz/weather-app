@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#=@6s^nxj7ajc1cqa@w)#@z&$599c1db)i0id1g*ikb_zewud7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['.railway.app', 'localhost',
     '127.0.0.1','*']
@@ -144,10 +144,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://weather-app-pw2u.onrender.com/'
 ]
 
-CSRF_COOKIE_SECURE = True     # only sent over HTTPS
-CSRF_COOKIE_SAMESITE = 'Lax'  # or 'None' if needed
-CSRF_COOKIE_HTTPONLY = False  # Must be False for the cookie to be accessible
+CSRF_COOKIE_SECURE = True   
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
 
 # Session Cookie Settings
-SESSION_COOKIE_SECURE = True  # Only if using HTTPS
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
